@@ -1,0 +1,40 @@
+# .github/workflows/agent.yml
+name: AI Agent Auto-Fix
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  ai-review-and-fix:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pull-requests: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # ---> ADDED HERE: After Python is set up, install your libraries
+      - name: Install dependencies
+        run: pip install anthropic python-dotenv
+
+      - name: Run AI Agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python ai_agent.py
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "fix: Claude AI removed unsafe code"
+          title: "🤖 Claude Agent: Code Security Fixes"
+          body: "Claude analyzed `calculator.py`, detected security risks, and updated the code automatically."
+          branch: "ai-auto-fix-branch"
+          base: "main"
